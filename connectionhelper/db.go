@@ -30,7 +30,8 @@ const (
 
 //GetMongoClient - Return mongodb connection to work with
 func GetMongoClient() (*mongo.Client, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	//Perform connection creation operation only once.
 	mongoOnce.Do(func() {
 		// Set client options

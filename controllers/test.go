@@ -15,7 +15,8 @@ import (
 func GetTests() gin.HandlerFunc {
 	query := bson.D{{}}
 	tests := []models.Test{}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	client, err := connectionhelper.GetMongoClient()
 	if err != nil {
