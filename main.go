@@ -5,9 +5,6 @@ import (
 )
 
 func main() {
-
 	r := routes.InitRouter()
-
 	r.Run("localhost:12312")
-
 }
