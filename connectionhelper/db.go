@@ -25,6 +25,7 @@ var mongoOnce sync.Once
 const (
 	CONNECTIONSTRING = "mongodb://localhost:27017"
 	DB               = "mr-grocery"
+	ITEMS            = "items"
 	TEST             = "test"
 )
 
