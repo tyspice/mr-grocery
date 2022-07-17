@@ -11,10 +11,16 @@ type Test struct {
 }
 
 type GroceryItem struct {
-	ID              primitive.ObjectID `bson:"_id" json:"id"`
+	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	Item            string             `bson:"item" json:"item"`
 	InventoryStatus int32              `bson:"inventoryStatus" json:"inventoryStatus"`
 	Created         primitive.DateTime `bson:"created" json:"created"`
 	Updated         primitive.DateTime `bson:"updated" json:"updated"`
 	Notes           string             `bson:"notes" json:"notes"`
+}
+
+type NewGroceryItemRequest struct {
+	Item            string `bson:"item" json:"item"`
+	InventoryStatus int32  `bson:"inventoryStatus" json:"inventoryStatus"`
+	Notes           string `bson:"notes" json:"notes"`
 }

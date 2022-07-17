@@ -13,16 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func getItemsCollection() (*mongo.Collection, gin.HandlerFunc) {
-	client, err := connectionhelper.GetMongoClient()
-	if err != nil {
-		return nil, func(c *gin.Context) {
-			c.JSON(http.StatusInternalServerError, gin.H{"status": "error getting mongo client"})
-		}
-	}
-
+func getItemsCollection() *mongo.Collection {
+	client, _ := connectionhelper.GetMongoClient()
 	collection := client.Database(connectionhelper.DB).Collection(connectionhelper.ITEMS)
-	return collection, nil
+	return collection
 }
 
 func GetAll() gin.HandlerFunc {
@@ -31,7 +25,7 @@ func GetAll() gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		collection, _ := getItemsCollection()
+		collection := getItemsCollection()
 
 		cur, findError := collection.Find(ctx, bson.D{{}})
 		if findError != nil {
@@ -67,7 +61,7 @@ func GetOne() gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
-		collection, _ := getItemsCollection()
+		collection := getItemsCollection()
 
 		if err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&item); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error decoding cursor"})
@@ -78,8 +72,24 @@ func GetOne() gin.HandlerFunc {
 	}
 }
 
-func CreateOne() {
+func CreateOne() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body models.NewGroceryItemRequest
+		c.BindJSON(&body)
+		now := time.Now()
+		doc := bson.M{"item": body.Item, "notes": body.Notes, "inventoryStatus": body.InventoryStatus, "created": now, "updated": now}
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
+		collection := getItemsCollection()
+
+		result, err := collection.InsertOne(ctx, doc)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error inserting document"})
+		}
+
+		c.JSON(http.StatusOK, result)
+	}
 }
 
 func UpdateOne() {
