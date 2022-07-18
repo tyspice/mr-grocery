@@ -92,8 +92,33 @@ func CreateOne() gin.HandlerFunc {
 	}
 }
 
-func UpdateOne() {
+func UpdateOne() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
+		var fieldsToUpdate models.UpdateGroceryItem
+		idString := c.Param("id")
+		id, err := primitive.ObjectIDFromHex(idString)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error converting id"})
+		}
+
+		c.BindJSON(&fieldsToUpdate)
+		fieldsToUpdate.Updated = primitive.NewDateTimeFromTime(time.Now())
+
+		filter := bson.M{"_id": id}
+		update := bson.M{"$set": fieldsToUpdate}
+
+		collection := getItemsCollection()
+
+		result, err := collection.UpdateOne(ctx, filter, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error updating document"})
+		}
+
+		c.JSON(http.StatusOK, result)
+	}
 }
 
 func DeleteOne() {

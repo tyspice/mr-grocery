@@ -13,6 +13,7 @@ func InitRouter() *gin.Engine {
 		v4.GET("/getItems", controllers.GetAll())
 		v4.GET("/getItem/:id", controllers.GetOne())
 		v4.POST("/addItem", controllers.CreateOne())
+		v4.PUT("/updateItem/:id", controllers.UpdateOne())
 	}
 	return r
 }

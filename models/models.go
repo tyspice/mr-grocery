@@ -20,7 +20,14 @@ type GroceryItem struct {
 }
 
 type NewGroceryItemRequest struct {
-	Item            string `bson:"item" json:"item"`
-	InventoryStatus int32  `bson:"inventoryStatus" json:"inventoryStatus"`
-	Notes           string `bson:"notes" json:"notes"`
+	Item            string `json:"item"`
+	InventoryStatus int32  `json:"inventoryStatus"`
+	Notes           string `json:"notes"`
+}
+
+type UpdateGroceryItem struct {
+	Item            string             `bson:"item,omitempty" json:"item,omitempty"`
+	InventoryStatus int32              `bson:"inventoryStatus,omitempty" json:"inventoryStatus,omitempty"`
+	Notes           string             `bson:"notes,omitempty" json:"notes,omitempty"`
+	Updated         primitive.DateTime `bson:"updated,omitempty" json:"updated,omitempty"`
 }
