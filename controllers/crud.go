@@ -21,9 +21,10 @@ func getItemsCollection() *mongo.Collection {
 
 func GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		items := []models.GroceryItem{}
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
+
+		items := []models.GroceryItem{}
 
 		collection := getItemsCollection()
 
@@ -52,14 +53,15 @@ func GetAll() gin.HandlerFunc {
 
 func GetOne() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
 		idString := c.Param("id")
 		id, err := primitive.ObjectIDFromHex(idString)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"status": "error converting id"})
 		}
 		var item models.GroceryItem
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
 
 		collection := getItemsCollection()
 
@@ -74,12 +76,13 @@ func GetOne() gin.HandlerFunc {
 
 func CreateOne() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
 		var body models.NewGroceryItemRequest
 		c.BindJSON(&body)
 		now := time.Now()
 		doc := bson.M{"item": body.Item, "notes": body.Notes, "inventoryStatus": body.InventoryStatus, "created": now, "updated": now}
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
 
 		collection := getItemsCollection()
 
@@ -121,6 +124,25 @@ func UpdateOne() gin.HandlerFunc {
 	}
 }
 
-func DeleteOne() {
+func DeleteOne() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
+		idString := c.Param("id")
+		id, err := primitive.ObjectIDFromHex(idString)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error converting id"})
+		}
+
+		filter := bson.M{"_id": id}
+		collection := getItemsCollection()
+
+		result, err := collection.DeleteOne(ctx, filter)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error deleting document"})
+		}
+
+		c.JSON(http.StatusOK, result)
+	}
 }
